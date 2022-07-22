@@ -4,13 +4,14 @@ const User = require("../models/User");
 const { body, validationResult } = require("express-validator");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const fetchUser = require("../middleware/FetchUser");
 const jwtSecret = "RudraIsTheBest";
 
 router.get("/", (req, res) => {
   res.send("Hello");
 });
 
-// * Create POST request
+// * Create POST request for Sign-Up
 router.post(
   "/sign-up",
   [
@@ -55,6 +56,8 @@ router.post(
   }
 );
 
+// * Create POST request for Login
+
 router.post(
   "/login",
   [
@@ -70,7 +73,7 @@ router.post(
 
     const { email, password } = req.body;
     try {
-      let user = User.findOne({ email });
+      let user = await User.findOne({ email });
       if (!user) {
         return res.status(404).json({ errors: "Enter correct credentials" });
       }
@@ -79,7 +82,7 @@ router.post(
         return res.status(404).json({ errors: "Enter correct credentials" });
       }
       const data = {
-        id: User.id,
+        id: user.id,
       };
       const authToken = jwt.sign(data, jwtSecret);
       res.json({ authToken });
@@ -89,5 +92,20 @@ router.post(
     }
   }
 );
+
+// * Create POST request for Fetch User
+
+router.post("/fetch-user", fetchUser, async (req, res) => {
+  try {
+    userId = await req.userId;
+    console.log("\n");
+    console.log(req.userId);
+    const user = await User.findById(userId).select("-password");
+    res.send(user);
+  } catch (error) {
+    console.log(error.message);
+    res.status(500).send("Internal Server Error Occured ME");
+  }
+});
 
 module.exports = router;
