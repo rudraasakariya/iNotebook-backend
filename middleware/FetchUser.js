@@ -1,7 +1,7 @@
 const jwt = require("jsonwebtoken");
 const jwtSecret = "RudraIsTheBest";
 const fetchUser = async (req, res, next) => {
-  const token = await req.header("auth-token");
+  const token = await req.header("auth_token");
   if (!token) {
     res.status(401).send({ error: "Invalid Token" });
   }
